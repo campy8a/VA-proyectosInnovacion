@@ -2,7 +2,11 @@
 <meta charset="utf-8">
 <style> /* set the CSS */
 
-body { font: 22px Arial;}
+body { 	font-family: 'Oswald', sans-serif;
+		font: 12px;
+		color: #666666;
+		background-color: #212121;
+}
 
 path { 
     stroke: steelblue;
@@ -19,22 +23,75 @@ path {
 }
 
 .legend {
-    font-size: 12px;
-    text-anchor: middle;
-    
+    font-size: 20px;
+    text-anchor: middle;	
+}
+h1{
+	font-weight:600;
+	font-size: 50px;
+	text-align: center;
+	color: WHITE;
+}
+p{
+	color: #a3a1a1;
+}
+
+#space
+{
+	height: 70px;
+	background-color: #455e41; 	
+}
+#description{
+	text-align: center;
+	color:#82621c ;
+	margin-top: 40px;
+	margin-bottom: 70px;
+}
+
+svg{
+	align: center;
+}
+
+axisRed line{
+  stroke: WHITE;
+}
+
+.axisRed path{
+  stroke: WHITE;
+}
+
+.axisRed text{
+  fill: WHITE;
+}	
+.text
+{
+text-align:left;
 }
 
 </style>
-<body>
 
+<body>
+<div id=header></div>
+<div id="tittle">
+	<h1> <span> Places to entrepeneur and investigate in colombia</br>
+		where to do it acording to history</span></h1>
+</div>
+<div id="description">
+	<p>
+	This visualization shows the amount of entrepeneur and investigation proyects realizes on each of the departments all across Colombia
+	registered from 2009 till October 2016 </br>
+	This may help in different decisions such as where to invest
+	</p>
+</div>
+<div id="space"></div>
 <!-- load the d3.js library -->    
 <script src="https://d3js.org/d3.v4.min.js"></script>
 
 <script>
 
 // Set the dimensions of the canvas / graph
-var margin = {top: 20, right: 200, bottom: 100, left: 80},
-    width = 1240 - margin.left - margin.right,
+var margin = {top: 20, right: 230, bottom: 100, left: 100},
+    width = 1500 - margin.left - margin.right,
     height = 720 - margin.top - margin.bottom;
 
 // Parse the date / time
@@ -56,7 +113,7 @@ var svg = d3.select("body")
         .attr("height", height + margin.top + margin.bottom)
     .append("g")
         .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
+              "translate(" + 50 + "," + 60+ ")");
 
 // Get the data
 d3.tsv("DatosLimpios.tsv", function(error, data) {
@@ -77,7 +134,7 @@ d3.tsv("DatosLimpios.tsv", function(error, data) {
     // set the colour scale
     var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-    legendSpace = 100; // spacing for the legend
+    legendSpace = 98; // spacing for the legend
 
     // Loop through each symbol / key
     dataNest.forEach(function(d,i) { 
@@ -91,11 +148,14 @@ d3.tsv("DatosLimpios.tsv", function(error, data) {
 
         // Add the Legend
         svg.append("text")
-            .attr("x", width+(legendSpace))  // space legend
-            .attr("y", height -(20*i))
+            .attr("x", 1450)  // space legend
+            .attr("y", height -(20*i))	
             .attr("class", "legend")    // style the legend
+			.style("text-anchor","end")
             .style("fill", function() { // Add the colours dynamically
                 return d.color = color(d.key); })
+			
+		
             .on("click", function(){
                 // Determine if current line is visible 
                 var active   = d.active ? false : true,
@@ -114,13 +174,13 @@ d3.tsv("DatosLimpios.tsv", function(error, data) {
 
   // Add the X Axis
   svg.append("g")
-      .attr("class", "axis")
+      .attr("class", "axisRed")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
   // Add the Y Axis
   svg.append("g")
-      .attr("class", "axis")
+      .attr("class", "axisRed")
       .call(d3.axisLeft(y));
   
 
