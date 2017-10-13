@@ -1,190 +1,235 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style> /* set the CSS */
+<html>
 
-body { 	font-family: 'Oswald', sans-serif;
-		font: 12px;
-		color: #666666;
-		background-color: #212121;
-}
+<head>
+    <!-- 
+autor: @jofremanchola
+COMENTARIOS GENERALES:
+* Se agrega tag html y head
+* El dato "SAN ANDRES+", generaba error cuando se quería desactivar esa línea, se cambia el dato a "SAN ANDRES" en DatosLimpios.tsv
+* Se cambia cursor en la leyenda indicando al usuario que pude hacer clic
+* Se incrementa el tamaño de los textos en los ejes
+* Se agrega título al eje vertical
+* Se corrige falta ortográfica en "entrepreneur"
 
-path { 
-    stroke: steelblue;
-    stroke-width: 2;
-    fill: none;
-}
+SUGERENCIA ADICIONAL (NO IMPLEMENTADA)
+* Mostrar tooltip con valor en la serie con el evento onmouseover
+ -->
 
-.axis path,
-.axis line {
-    fill: none;
-    stroke: grey;
-    stroke-width: 1;
-    shape-rendering: crispEdges;
-}
 
-.legend {
-    font-size: 20px;
-    text-anchor: middle;	
-}
-h1{
-	font-weight:600;
-	font-size: 50px;
-	text-align: center;
-	color: WHITE;
-}
-p{
-	color: #a3a1a1;
-}
+    <meta charset="utf-8">
+    <style>
+        /* set the CSS */
 
-#space
-{
-	height: 70px;
-	background-color: #455e41; 	
-}
-#description{
-	text-align: center;
-	color:#82621c ;
-	margin-top: 40px;
-	margin-bottom: 70px;
-}
+        body {
+            font-family: 'Oswald', sans-serif;
+            font: 12px;
+            color: #666666;
+            background-color: #212121;
+        }
 
-svg{
-	align: center;
-}
+        path {
+            stroke: steelblue;
+            stroke-width: 2;
+            fill: none;
+        }
 
-axisRed line{
-  stroke: WHITE;
-}
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: grey;
+            stroke-width: 1;
+            shape-rendering: crispEdges;
+        }
 
-.axisRed path{
-  stroke: WHITE;
-}
+        .legend {
+            font-size: 20px;
+            text-anchor: middle;
+        }
 
-.axisRed text{
-  fill: WHITE;
-}	
-.text
-{
-text-align:left;
-}
+        .legend:hover {
+            /* Se cambia cursor indicando al usuario que pude hacer clic */
+            cursor: pointer;
+        }
 
-</style>
+        h1 {
+            font-weight: 600;
+            font-size: 50px;
+            text-align: center;
+            color: WHITE;
+        }
+
+        p {
+            color: #a3a1a1;
+        }
+
+        #space {
+            height: 70px;
+            background-color: #455e41;
+        }
+
+        #description {
+            text-align: center;
+            color: #82621c;
+            margin-top: 40px;
+            margin-bottom: 70px;
+        }
+
+        svg {
+            align: center;
+        }
+
+        axisRed line {
+            stroke: WHITE;
+        }
+
+        .axisRed path {
+            stroke: WHITE;
+        }
+
+        .axisRed text {
+            fill: WHITE;
+            /* Se incrementa el tamaño de los textos en los ejes */
+            font-size: 1.5em;
+        }
+
+        .axisRedTitle {
+            font-size: 2.5em !important;
+        }
+
+        .text {
+            text-align: left;
+        }
+    </style>
+</head>
 
 <body>
-<div id=header></div>
-<div id="tittle">
-	<h1> <span> Places to entrepeneur and investigate in Colombia:</br>
+    <div id=header></div>
+    <div id="tittle">
+        <h1> <span> Places to entrepreneur and investigate in Colombia:<br />
 		Where to do it acording to history</span></h1>
-</div>
-<div id="description">
-	<p>
-	This visualization shows the amount of entrepeneur and investigation proyects realizes on each of the departments all across Colombia
-	registered from 2009 till October 2016 </br>
-	This may help in different decisions such as where to invest
-	</p>
-</div>
-<div id="space"></div>
-<!-- load the d3.js library -->    
-<script src="https://d3js.org/d3.v4.min.js"></script>
+    </div>
+    <div id="description">
+        <p>
+            This visualization shows the amount of entrepreneur and investigation proyects realizes on each of the departments all across
+            Colombia registered from 2009 till October 2016 <br /> This may help in different decisions such
+            as where to invest
+        </p>
+    </div>
+    <div id="space"></div>
+    <!-- load the d3.js library -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
-<script>
+    <script>
+        // Set the dimensions of the canvas / graph
+        var margin = { top: 20, right: 230, bottom: 100, left: 100 },
+            width = 1500 - margin.left - margin.right,
+            height = 720 - margin.top - margin.bottom;
 
-// Set the dimensions of the canvas / graph
-var margin = {top: 20, right: 230, bottom: 100, left: 100},
-    width = 1500 - margin.left - margin.right,
-    height = 720 - margin.top - margin.bottom;
+        // Parse the date / time
+        var parseDate = d3.timeParse("%Y");
 
-// Parse the date / time
-var parseDate = d3.timeParse("%Y");
+        // Set the ranges
+        var x = d3.scaleTime().range([0, width]);
+        var y = d3.scaleLinear().range([height, 0]);
 
-// Set the ranges
-var x = d3.scaleTime().range([0, width]);  
-var y = d3.scaleLinear().range([height, 0]);
+        // Define the line
+        var priceline = d3.line()
+            .x(function (d) { return x(d.ANHO_APROBACION); })
+            .y(function (d) { return y(d.TOTAL_PROYECTOS); });
 
-// Define the line
-var priceline = d3.line()   
-    .x(function(d) { return x(d.ANHO_APROBACION); })
-    .y(function(d) { return y(d.TOTAL_PROYECTOS); });
-    
-// Adds the svg canvas
-var svg = d3.select("body")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform", 
-              "translate(" + 50 + "," + 60+ ")");
+        // Adds the svg canvas
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+            "translate(" + 100 + "," + 60 + ")");
+        // "translate(" + margin.left + "," + margin.bottom + ")");
 
-// Get the data
-d3.tsv("DatosLimpios.tsv", function(error, data) {
-    data.forEach(function(d) {
-        d.ANHO_APROBACION = parseDate(d.ANHO_APROBACION);
-        d.TOTAL_PROYECTOS = +d.TOTAL_PROYECTOS;
-    });
+        // Get the data
+        d3.tsv("DatosLimpios.tsv", function (error, data) {
+            // Alerta si error
+            if (error) throw error;
 
-    // Scale the range of the data
-    x.domain(d3.extent(data, function(d) { return d.ANHO_APROBACION; }));
-    y.domain([0, d3.max(data, function(d) { return d.TOTAL_PROYECTOS; })]);
+            data.forEach(function (d) {
+                d.ANHO_APROBACION = parseDate(d.ANHO_APROBACION);
+                d.TOTAL_PROYECTOS = +d.TOTAL_PROYECTOS;
+            });
 
-    // Nest the entries by symbol
-    var dataNest = d3.nest()
-        .key(function(d) {return d.DEPARTAMENTO_PROYECTO;})
-        .entries(data);
+            // Scale the range of the data
+            x.domain(d3.extent(data, function (d) { return d.ANHO_APROBACION; }));
+            y.domain([0, d3.max(data, function (d) { return d.TOTAL_PROYECTOS; })]);
 
-    // set the colour scale
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
+            // Nest the entries by symbol
+            var dataNest = d3.nest()
+                .key(function (d) { return d.DEPARTAMENTO_PROYECTO; })
+                .entries(data);
 
-    legendSpace = 98; // spacing for the legend
+            // set the colour scale
+            var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-    // Loop through each symbol / key
-    dataNest.forEach(function(d,i) { 
+            legendSpace = 98; // spacing for the legend
 
-        svg.append("path")
-            .attr("class", "line")
-            .style("stroke", function() { // Add the colours dynamically
-                return d.color = color(d.key); })
-            .attr("id", 'tag'+d.key.replace(/\s+/g, '')) // assign an ID
-            .attr("d", priceline(d.values));
+            // Loop through each symbol / key
+            dataNest.forEach(function (d, i) {
 
-        // Add the Legend
-        svg.append("text")
-            .attr("x", 1450)  // space legend
-            .attr("y", height -(20*i))	
-            .attr("class", "legend")    // style the legend
-			.style("text-anchor","end")
-            .style("fill", function() { // Add the colours dynamically
-                return d.color = color(d.key); })
-			
-		
-            .on("click", function(){
-                // Determine if current line is visible 
-                var active   = d.active ? false : true,
-                newOpacity = active ? 0 : 1; 
-                // Hide or show the elements based on the ID
-                d3.select("#tag"+d.key.replace(/\s+/g, ''))
-                    .transition().duration(100) 
-                    .style("opacity", newOpacity); 
-                // Update whether or not the elements are active
-                d.active = active;
-                })  
-            .text(d.key); 
+                svg.append("path")
+                    .attr("class", "line")
+                    .style("stroke", function () { // Add the colours dynamically
+                        return d.color = color(d.key);
+                    })
+                    .attr("id", 'tag' + d.key.replace(/\s+/g, '')) // assign an ID
+                    .attr("d", priceline(d.values));
 
-    });
-  
+                // Add the Legend
+                svg.append("text")
+                    .attr("x", 1400)  // space legend
+                    .attr("y", height - (20 * i))
+                    .attr("class", "legend")    // style the legend
+                    .style("text-anchor", "end")
+                    .style("fill", function () { // Add the colours dynamically
+                        return d.color = color(d.key);
+                    })
 
-  // Add the X Axis
-  svg.append("g")
-      .attr("class", "axisRed")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
 
-  // Add the Y Axis
-  svg.append("g")
-      .attr("class", "axisRed")
-      .call(d3.axisLeft(y));
-  
+                    .on("click", function () {
+                        // Determine if current line is visible 
+                        var active = d.active ? false : true,
+                            newOpacity = active ? 0 : 1;
+                        // Hide or show the elements based on the ID
+                        d3.select("#tag" + d.key.replace(/\s+/g, ''))
+                            .transition().duration(100)
+                            .style("opacity", newOpacity);
+                        // Update whether or not the elements are active
+                        d.active = active;
+                    })
+                    .text(d.key);
 
-});
+            });
 
-</script>
+
+            // Add the X Axis
+            svg.append("g")
+                .attr("class", "axisRed")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            // Add the Y Axis
+            var yaxis = svg.append("g")
+                .attr("class", "axisRed")
+                .call(d3.axisLeft(y));
+
+            // Se agrega título al eje Y
+            yaxis.append("text")
+                .text("Amount of entrepreneur")
+                .attr("transform", "translate(" + (-margin.left / 2) + "," + height / 2 + ") rotate(-90)")
+                .attr("text-anchor", "middle")
+                .attr("class", "axisRedTitle");
+
+        });
+    </script>
 </body>
+
+</html>
